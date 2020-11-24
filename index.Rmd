@@ -9,6 +9,7 @@ output:
     css: ["././libs/slides.css", "././libs/animate.css"]
     lib_dir: ./libs
     seal: false
+    anchor_sections: false
     nature:
       highlightStyle: github
       ratio: '16:9'
@@ -118,6 +119,60 @@ background-size: cover
 .title[Hello!]
 
 ---
+class: center
+background-image: linear-gradient(to right, rgba(255, 255, 255, .1), rgba(150, 150, 150, .1)), url("resources/season.jpg")
+background-size: cover
+
+## Understanding multiple seasonality
+
+---
+background-image: linear-gradient(to right, rgba(255, 255, 255, .1), rgba(150, 150, 150, .1)), url("resources/season.jpg")
+background-size: cover
+
+## What is seasonality?
+
+--
+
+> A consistent pattern which repeats over a fixed period of time.
+
+--
+
+.box-12.opaque[
+```{r ped-seasonality}
+pedestrian %>% 
+  filter(Sensor == "Southern Cross Station",
+         between(Date, parse_date("2015-04-13"), parse_date("2015-04-17"))) %>% 
+  autoplot(Count) + 
+  scale_x_datetime(date_labels = "%A", date_breaks = "1 day") +
+  labs(y = "Number of pedestrians", x = "Time", title = "Pedestrian traffic at Southern Cross Station (Victoria, Australia)")
+```
+]
+
+
+---
+background-image: linear-gradient(to right, rgba(255, 255, 255, .1), rgba(150, 150, 150, .1)), url("resources/season.jpg")
+background-size: cover
+
+## What is *multiple* seasonality?
+
+--
+
+> Two or more seasonal patterns.
+
+--
+
+.box-12.opaque[
+```{r ped-multi-seasonality}
+pedestrian %>% 
+  filter(Sensor == "Southern Cross Station",
+         yearmonth(Date) == yearmonth("2015 Apr")) %>% 
+  autoplot(Count) + 
+  scale_x_datetime(date_labels = "%d %b %Y", date_breaks = "5 days") +
+  labs(y = "Number of pedestrians", x = "Time", title = "Pedestrian traffic at Southern Cross Station (Victoria, Australia)")
+```
+]
+
+---
 class: inverse
 background-image: linear-gradient(to right, rgba(50, 50, 50, .1), rgba(200, 200, 200, .4)), url("resources/sparks.jpg")
 background-size: cover
@@ -128,7 +183,7 @@ Not all models discussed are available on the release version of the software ye
 
 --
 
-.sticker-float[![wip](resources/construction.gif)]
+![wip](resources/construction.gif)
 
 ---
 class: center
