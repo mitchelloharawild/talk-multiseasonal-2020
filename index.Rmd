@@ -203,12 +203,218 @@ class: center
 ]
 
 ---
+class: top
+
+```{r}
+htmltools::tags$iframe(src = "https://otexts.com/fpp3/a-tidy-forecasting-workflow.html", 
+                       width = "100%", height = "640px")
+```
+
+---
+class: inverse, center
+background-image: linear-gradient(to right, rgba(50, 50, 50, .5), rgba(50, 50, 50, .5)), url("resources/disk.jpg")
+background-size: cover
+
+.title[Tidy]
+
+<hr>
+
+## Data preparation
+
+---
+class: top
+
+# Hospital admissions
+
+```{r, echo = TRUE}
+fs::dir_tree("~/github/webinar-msc-nhs/")
+```
+
+.footnote[*https://github.com/bahmanrostamitabar/webinar-msc-nhs/*]
+
+---
+class: top
+
+# Admissions event data
+
+```{r admission-raw, echo = TRUE}
+admissions <- read_csv(
+  file = "~/github/webinar-msc-nhs/data/ae_uk.csv",
+  col_types = cols(arrival_time=col_datetime(format = "%d/%m/%Y %H:%M"))
+) %>%
+  select(-ID) # ID is a redundant row identifier 
+print(admissions)
+```
+
+---
+class: top
+
+# Holiday data
+
+```{r holiday-raw, echo = TRUE}
+holidays <- read_csv(
+  file = "~/github/webinar-msc-nhs/data/holiday.csv",
+  col_types = cols(date=col_date(format = "%d/%m/%Y"))
+) %>% 
+  filter(!is.na(date)) # Some extra empty rows exist that need removing
+print(holidays)
+```
+
+---
+class: top
+
+# Temperature data
+
+```{r temperature-raw, echo = TRUE}
+temperatures <- read_csv(
+  file = "~/github/webinar-msc-nhs/data/temp.csv",
+  col_types = cols(date=col_date(format = "%d/%m/%Y"))
+)
+
+print(temperatures)
+```
+
+---
 
 class: top
 
 .sticker-float[![tsibble](resources/tsibble.svg)]
 
-# Tidy temporal data structure
+# Tidy temporal data structures
+
+```{r}
+htmltools::tags$iframe(src = "https://thesis.earo.me/3-3-sec-semantics.html", 
+                       width = "100%", height = "500px")
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Tidy temperature data
+
+Identify the index, key and measurement variables:
+
+```{r temperature-qa, echo = TRUE, eval = FALSE}
+temperatures <- as_tsibble(temperatures, 
+           index = ???, key = ???) #<<
+```
+
+```{r}
+temperatures
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Tidy temperature data
+
+Identify the index, key and measurement variables:
+
+```{r temperature-tsbl, echo = TRUE, eval = TRUE}
+temperatures <- as_tsibble(temperatures, 
+           index = date, key = NULL) #<<
+```
+
+```{r}
+temperatures
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Tidy holiday data
+
+Identify the index, key and measurement variables:
+
+```{r holiday-qa, echo = TRUE, eval = FALSE}
+holidays <- as_tsibble(holidays, 
+           index = ???, key = ???) #<<
+```
+
+```{r}
+holidays
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Tidy holiday data
+
+Identify the index, key and measurement variables:
+
+```{r holiday-tsbl, echo = TRUE, eval = TRUE}
+holidays <- as_tsibble(holidays, 
+           index = date, key = NULL) #<<
+```
+
+```{r}
+holidays
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Tidy admissions data
+
+Identify the index, key and measurement variables:
+
+```{r admission-qa, echo = TRUE, eval = FALSE}
+admissions <- as_tsibble(admissions, 
+           index = ???, key = ???) #<<
+```
+
+```{r}
+admissions
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Tidy admissions data
+
+Identify the index, key and measurement variables:
+
+```{r admission-bad, echo = TRUE, eval = TRUE, error = TRUE}
+admissions <- as_tsibble(admissions, 
+           index = arrival_time, key = c(gender, type_injury)) #<<
+```
+
+--
+
+```{r admission-duplicates, echo = TRUE}
+duplicates(admissions, index = arrival_time, key = c(gender, type_injury))
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Tidy admissions data
+
+Identify the index, key and measurement variables:
+
+```{r admission-tsbl, echo = TRUE, eval = TRUE, error = TRUE}
+admissions <- admissions %>% 
+  count(gender, type_injury, arrival_time, name = "arrivals") %>% #<<
+  as_tsibble(index = arrival_time, key = c(gender, type_injury))
+```
+
+```{r}
+admissions
+```
 
 ---
 class: inverse, top
