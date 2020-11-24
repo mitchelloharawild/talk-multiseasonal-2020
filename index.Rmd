@@ -129,7 +129,9 @@ background-size: cover
 background-image: linear-gradient(to right, rgba(255, 255, 255, .1), rgba(150, 150, 150, .1)), url("resources/season.jpg")
 background-size: cover
 
+.center[
 ## What is seasonality?
+]
 
 --
 
@@ -153,7 +155,9 @@ pedestrian %>%
 background-image: linear-gradient(to right, rgba(255, 255, 255, .1), rgba(150, 150, 150, .1)), url("resources/season.jpg")
 background-size: cover
 
+.center[
 ## What is *multiple* seasonality?
+]
 
 --
 
@@ -173,9 +177,80 @@ pedestrian %>%
 ]
 
 ---
+
+## Capturing (multiple) seasonal patterns
+
+1. Seasonal dummies
+1. Fourier terms
+1. Lag terms
+1. Exogenous regressors
+
+---
+
+## Models with multiple seasonal forecasting capabilities
+
+1. TSLM
+1. GAM
+1. Prophet
+1. FASSTER
+1. DSHW
+1. TBATS
+1. STL decomposition forecasting
+
+
+---
+
+## Models with multiple seasonal forecasting capabilities
+
+<br>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Flexible</th>
+      <th>Speed</th>
+      <th>Accuracy</th>
+      <th>Exogenous Regressors</th>
+      <th>Decompose Components</th>
+      <th>Evolving Terms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Regression<br>(TSLM, GAM, Prophet)</td>
+      <td class="success">Yes</td>
+      <td class="success">Fast</td>
+      <td class="warning">Okay</td>
+      <td class="success">Yes</td>
+      <td class="warning">Depends</td>
+      <td class="danger">No</td>
+    </tr>
+    <tr>
+      <td>State&nbspSpace<br>(DSHW, TBATS, FASSTER)</td>
+      <td class="danger">No</td>
+      <td class="danger">Slow</td>
+      <td class="warning">Okay</td>
+      <td class="warning">Depends</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+    </tr>
+    <tr>
+      <td>Decomposition<br>(STL + ???)</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Moderate</td>
+      <td class="warning">Okay</td>
+      <td class="warning">Depends</td>
+      <td class="success">Yes</td>
+      <td class="warning">Depends</td>
+    </tr>
+  </tbody>
+</table>
+
+.footnote[(this table is a *massive* generalisation)]
+---
 class: center
 
-## What is fable?
+## Forecasting multiple seasonality in R
 
 .sticker[![fable](resources/fable.svg)]
 
