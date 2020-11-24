@@ -173,19 +173,6 @@ pedestrian %>%
 ]
 
 ---
-class: inverse
-background-image: linear-gradient(to right, rgba(50, 50, 50, .1), rgba(200, 200, 200, .4)), url("resources/sparks.jpg")
-background-size: cover
-
-# Development code demonstrated
-
-Not all models discussed are available on the release version of the software yet.
-
---
-
-![wip](resources/construction.gif)
-
----
 class: center
 
 ## What is fable?
