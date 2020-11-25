@@ -340,18 +340,93 @@ background-image: linear-gradient(to right, rgba(50, 50, 50, .5), rgba(50, 50, 5
 background-size: cover
 
 .center[
-## Which seasonal methods should I use?
+## Which seasonal method should I use?
 ]
 
 <hr>
 
 --
 
-.center[
-Whichever method is available and works best for your data!
+<br>
 
-For *multiple* seasonality, *multiple* methods may be needed.
+.center[
+
+### For *multiple* seasonality, *multiple* methods may be needed.
+<br>
+
+### Use methods that are available and work best for your data!
 ]
+
+---
+
+## Models for forecasting multiple seasonalities
+
+Capability for including seasonal terms.
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Dummies</th>
+      <th>Lags</th>
+      <th>Fourier</th>
+      <th>Regressors</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>MLR</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+    </tr>
+    <tr>
+      <td>GAM</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+    </tr>
+    <tr>
+      <td>Prophet</td>
+      <td class="danger">No</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+    </tr>
+    <tr>
+      <td>DSHW</td>
+      <td class="success">Yes</td>
+      <td class="danger">No</td>
+      <td class="danger">No</td>
+      <td class="danger">No</td>
+    </tr>
+    <tr>
+      <td>BATS/TBATS</td>
+      <td class="success">Yes</td>
+      <td class="warning">Partial</td>
+      <td class="success">Yes</td>
+      <td class="danger">No</td>
+    </tr>
+    <tr>
+      <td>FASSTER</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+    </tr>
+    <tr>
+      <td>STL + ???</td>
+      <td class="warning">???</td>
+      <td class="warning">???</td>
+      <td class="warning">???</td>
+      <td class="warning">???</td>
+    </tr>
+  </tbody>
+</table>
+
+.footnote[(This *non-exhaustive* list includes the most common statistical methods only.)]
 
 ---
 
@@ -366,18 +441,106 @@ For *multiple* seasonality, *multiple* methods may be needed.
       <th>Flexible</th>
       <th>Speed</th>
       <th>Accuracy</th>
-      <th>Exogenous Regressors</th>
       <th>Decompose Components</th>
       <th>Evolving Terms</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Regression<br>(TSLM, GAM, Prophet)</td>
+      <td>Regression<br>(MLR, GAM, Prophet)</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>State&nbspSpace<br>(DSHW, TBATS, FASSTER)</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Decomposition<br>(STL + ???)</td>
+      <td></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Models for forecasting multiple seasonalities
+
+
+<br>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Flexible</th>
+      <th>Speed</th>
+      <th>Accuracy</th>
+      <th>Decompose Components</th>
+      <th>Evolving Terms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Regression<br>(MLR, GAM, Prophet)</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+    </tr>
+    <tr>
+      <td>State&nbspSpace<br>(DSHW, TBATS, FASSTER)</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+    </tr>
+    <tr>
+      <td>Decomposition<br>(STL + ???)</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends&nbsp;&nbsp;</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Depends</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Models for forecasting multiple seasonalities
+
+
+<br>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Flexible</th>
+      <th>Speed</th>
+      <th>Accuracy</th>
+      <th>Decompose Components</th>
+      <th>Evolving Terms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Regression<br>(MLR, GAM, Prophet)</td>
       <td class="success">Yes</td>
       <td class="success">Fast</td>
       <td class="warning">Okay</td>
-      <td class="success">Yes</td>
       <td class="warning">Depends</td>
       <td class="danger">No</td>
     </tr>
@@ -386,7 +549,6 @@ For *multiple* seasonality, *multiple* methods may be needed.
       <td class="danger">No</td>
       <td class="danger">Slow</td>
       <td class="warning">Okay</td>
-      <td class="warning">Depends</td>
       <td class="success">Yes</td>
       <td class="success">Yes</td>
     </tr>
@@ -395,14 +557,60 @@ For *multiple* seasonality, *multiple* methods may be needed.
       <td class="warning">Depends</td>
       <td class="warning">Moderate</td>
       <td class="warning">Okay</td>
-      <td class="warning">Depends</td>
       <td class="success">Yes</td>
       <td class="warning">Depends</td>
     </tr>
   </tbody>
 </table>
 
-.footnote[(this table is a *massive* generalisation)]
+.footnote[(This table is a *massive* generalisation, everything depends on data and model complexity.)]
+
+---
+
+## Models for forecasting multiple seasonalities
+
+
+<br>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Flexible</th>
+      <th>Speed</th>
+      <th>Accuracy</th>
+      <th>Decompose Components</th>
+      <th>Evolving Terms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Regression<br>(MLR, <b>GAM</b>, Prophet)</td>
+      <td class="success">Yes</td>
+      <td class="success">Fast</td>
+      <td class="warning">Okay</td>
+      <td class="warning">Depends</td>
+      <td class="danger">No</td>
+    </tr>
+    <tr>
+      <td>State&nbspSpace<br>(DSHW, TBATS, <b>FASSTER</b>)</td>
+      <td class="danger">No</td>
+      <td class="danger">Slow</td>
+      <td class="warning">Okay</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+    </tr>
+    <tr>
+      <td>Decomposition<br>(<b>STL + ???</b>)</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Moderate</td>
+      <td class="warning">Okay</td>
+      <td class="success">Yes</td>
+      <td class="warning">Depends</td>
+    </tr>
+  </tbody>
+</table>
+
+.footnote[(This table is a *massive* generalisation, everything depends on data and model complexity.)]
 ---
 class: center
 
