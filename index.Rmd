@@ -644,6 +644,7 @@ background-size: cover
 .title[Tidy]
 
 <hr>
+<br>
 
 ## Data preparation
 
@@ -841,6 +842,398 @@ admissions <- admissions %>%
 ```{r}
 admissions
 ```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Bringing the data together
+
+Can be a non-trivial task!
+
+--
+
+```{r tsbl-interval, echo = TRUE}
+interval(admissions)
+interval(holidays)
+interval(temperatures)
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Choosing appropriate temporal intervals
+
+What temporal granularity should `admissions` have?
+
+--
+
+A balancing act between:
+
+* The temporal detail needed for the forecasts
+* Enough detail/signal in the data for a good model
+
+--
+
+This choice has a big impact on the seasonal structures that will exist in the data!
+
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Choosing appropriate temporal intervals
+
+Option A: Keep it as is (event level)
+
+```{r temporal-a, echo = TRUE, fig.height=2.5}
+admissions %>% 
+  filter(yearmonth(arrival_time) == yearmonth("2010 Jan")) %>% 
+  summarise(arrivals = sum(arrivals)) %>% #<<
+  fill_gaps(arrivals = 0) %>% #<<
+  autoplot()
+#
+#
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Choosing appropriate temporal intervals
+
+Option B: 30 minutes
+
+```{r temporal-b, echo = TRUE, fig.height=2.5}
+admissions %>% 
+  filter(yearmonth(arrival_time) == yearmonth("2010 Jan")) %>% 
+  index_by(time = floor_date(arrival_time, "30 minutes")) %>% #<<
+  summarise(arrivals = sum(arrivals)) %>% 
+  fill_gaps(arrivals = 0) %>% 
+  autoplot()
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Choosing appropriate temporal intervals
+
+Option C: 1 hour
+
+```{r temporal-c, echo = TRUE, fig.height=2.5}
+admissions %>% 
+  filter(yearmonth(arrival_time) == yearmonth("2010 Jan")) %>% 
+  index_by(time = floor_date(arrival_time, "1 hour")) %>% #<<
+  summarise(arrivals = sum(arrivals)) %>% 
+  fill_gaps(arrivals = 0) %>% 
+  autoplot()
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Choosing appropriate temporal intervals
+
+Option D: 1 day
+
+```{r temporal-d, echo = TRUE, fig.height=2.5}
+admissions %>% 
+  filter(year(arrival_time) == 2010) %>% 
+  index_by(time = as.Date(floor_date(arrival_time, "1 day"))) %>% #<< 
+  summarise(arrivals = sum(arrivals)) %>% 
+  fill_gaps(arrivals = 0) %>% 
+  autoplot()
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Choosing appropriate temporal intervals
+
+Option E: 1 month
+
+```{r temporal-e, echo = TRUE, fig.height=2.5}
+admissions %>% 
+  index_by(time = yearmonth(floor_date(arrival_time, "1 day"))) %>% #<<
+  summarise(arrivals = sum(arrivals)) %>% 
+  fill_gaps(arrivals = 0) %>%
+  autoplot()
+#
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Choosing appropriate temporal intervals
+
+So what's best?
+
+> * Has the temporal detail needed for the forecasts
+> * Enough detail/signal in the data for a good model
+
+--
+
+.center[*It depends!*]
+
+--
+
+.center[
+# 🙄
+]
+
+--
+
+.center[For a multiple seasonality webinar, probably B or C. 
+
+Let's go with hourly data (C) for as it has better signal.]
+
+---
+
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Choosing appropriate temporal intervals
+
+```{r admissions-hourly, echo = TRUE}
+admissions <- admissions %>% 
+  index_by(time = floor_date(arrival_time, "1 hour")) %>% #<<
+  summarise(arrivals = sum(arrivals)) %>% 
+  ungroup() %>% 
+  fill_gaps(arrivals = 0)
+```
+
+--
+
+```{r}
+print(admissions)
+```
+
+
+---
+class: middle
+background-image: linear-gradient(to right, rgba(50, 50, 50, .5), rgba(50, 50, 50, .5)), url("resources/many_clocks.jpg")
+background-size: cover
+
+.box-12[
+## Aside
+
+Advanced forecasters may even choose multiple granularities!
+
+<br>
+
+Forecasts at many levels can be combined using **temporal reconciliation** to
+get more accurate results. 
+
+This process ensures the hourly forecasts add to the
+daily forecasts, and so on.
+
+<br>
+
+`r fa("desktop")` ISF 2020 slides: [slides.mitchelloharawild.com/isf2020](https://slides.mitchelloharawild.com/isf2020)
+`r fa("video")` Video recording: [youtu.be/6D7rNHZ5E-Q](https://youtu.be/6D7rNHZ5E-Q?t=1120)
+]
+
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Bringing the data together
+
+```{r tsbl-interval-update, echo = TRUE}
+interval(admissions)
+interval(holidays)
+interval(temperatures)
+```
+
+--
+
+It's okay for `holidays` to be daily as the holiday affects the entire day.
+
+Ideally, `temperatures` would be hourly as it varies throughout the day.
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Bringing the data together
+
+```{r, echo = TRUE}
+admissions %>% 
+  # Compute the common variable
+  mutate(date = as.Date(time))
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Bringing the data together
+
+```{r, echo = TRUE}
+admissions %>% 
+  # Compute the common variable
+  mutate(date = as.Date(time)) %>% 
+  # Join in holiday data (keeping only 'public_holiday' for simplicity)
+  left_join(holidays %>% select(public_holiday), by = "date")
+```
+
+---
+class: top
+
+.sticker-float[![tsibble](resources/tsibble.svg)]
+
+# Bringing the data together
+
+```{r hospital, echo = TRUE}
+hospital <- admissions %>% 
+  # Compute the common variable
+  mutate(date = as.Date(time)) %>% 
+  # Join in holiday data (keeping only 'public_holiday' for simplicity)
+  left_join(holidays %>% select(public_holiday), by = "date") %>% 
+  # Join in temperature data (keeping only 'actual_temp' for simplicity)
+  left_join(temperatures %>% select(actual_temp), by = "date")
+```
+
+```{r}
+print(hospital)
+```
+
+
+---
+class: inverse, center
+background-image: linear-gradient(to right, rgba(50, 50, 50, .5), rgba(50, 50, 50, .5)), url("resources/graph.jpg")
+background-size: cover
+
+.title[Visualise]
+
+<hr>
+
+<br>
+
+## Data exploration
+
+---
+
+# Visualising multiple seasonality
+
+Plotting hourly data observed over six years can be tricky!
+
+```{r admissions-plot, echo = TRUE, dev = "png", dpi = 150}
+admissions %>% 
+  autoplot(arrivals)
+```
+
+---
+
+# Visualising multiple seasonality
+
+One possibility is to view a portion of the data (but you might miss things!)
+
+```{r admissions-dygraph, echo = TRUE}
+library(dygraphs)
+tsbox::ts_xts(admissions) %>% 
+  dygraph() %>% 
+  dyRangeSelector(dateWindow = c("2010-01-01", "2010-02-01"))
+```
+
+---
+
+.sticker-float[![ggplot2](resources/feasts.svg)]
+
+# Visualising multiple seasonality
+
+Seeing the big picture may require aggregating the data.
+
+```{r subseries-month, echo = TRUE, fig.height=2.5}
+library(feasts)
+admissions %>% 
+  index_by(date = yearmonth(time)) %>% 
+  summarise(arrivals = sum(arrivals)) %>% 
+  gg_subseries(arrivals, period = "year")
+```
+
+
+---
+
+.sticker-float[![ggplot2](resources/feasts.svg)]
+
+# Visualising multiple seasonality
+
+```{r subseries-week, echo = TRUE, dev = "png", dpi = 150}
+admissions %>% 
+  index_by(date = as.Date(time)) %>% 
+  summarise(arrivals = sum(arrivals)) %>% 
+  gg_subseries(arrivals, period = "week")
+```
+
+---
+
+.sticker-float[![ggplot2](resources/feasts.svg)]
+
+# Visualising multiple seasonality
+
+```{r subseries-day, echo = TRUE, dev = "png", dpi = 150}
+admissions %>% 
+  gg_subseries(arrivals, period = "day")
+```
+
+---
+
+.sticker-float[![ggplot2](resources/ggplot2.svg)]
+
+# Visualising multiple seasonality
+
+```{r ggplot-day, echo = TRUE, dev = "png", dpi = 150}
+admissions %>% 
+  ggplot(aes(x = hour(time), y = arrivals)) + 
+  geom_jitter(alpha = 0.01) +
+  geom_smooth() + 
+  facet_grid(cols = vars(wday(time, label = TRUE, week_start = 1)))
+```
+
+---
+
+.sticker-float[![ggplot2](resources/ggplot2.svg)]
+
+# Visualising multiple seasonality
+
+```{r cal-code, eval = FALSE, echo = TRUE}
+library(sugrrants) #<<
+p <- admissions %>% 
+  mutate(date = as.Date(time)) %>% 
+  filter(year(time) == 2012) %>% 
+  frame_calendar(x = hour(time), y = arrivals, date = date) %>% #<<
+  ggplot(aes(x = `.hour(time)`, y = .arrivals, group = date)) + 
+  geom_line()
+prettify(p)
+```
+
+---
+.sticker-float[![ggplot2](resources/ggplot2.svg)]
+
+# Visualising multiple seasonality
+
+```{r cal-plot, ref.label="cal-code"}
+```
+
 
 ---
 class: inverse, top
