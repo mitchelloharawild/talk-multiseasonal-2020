@@ -177,30 +177,186 @@ pedestrian %>%
 ]
 
 ---
+class: inverse
+background-image: linear-gradient(to right, rgba(50, 50, 50, .5), rgba(50, 50, 50, .4)), url("resources/tree.jpg")
+background-size: cover
 
-## Capturing (multiple) seasonal patterns
+.center[
+## How can seasonal patterns be modelled?
+]
 
-1. Seasonal dummies
-1. Fourier terms
-1. Lag terms
-1. Exogenous regressors
+<hr>
+
+--
+
+<br><br>
+.center[
+### Seasonal dummy variables
+
+### Lagged terms
+
+### Fourier terms
+
+### Exogenous regressors
+]
 
 ---
 
-## Models with multiple seasonal forecasting capabilities
+## Modelling seasonal patterns with...
 
-1. TSLM
-1. GAM
-1. Prophet
-1. FASSTER
-1. DSHW
-1. TBATS
-1. STL decomposition forecasting
+## Seasonal dummy variables
 
+.pull-left[
+Produces distinct intercepts for each discrete season.
+
+✅ Simplest to interpret and produce.
+
+❌ Requires many terms for longer periods.
+
+❌ Poorly handles complex seasonality.
+]
+
+.pull-right[
+```{r dowdummy, echo=FALSE}
+df <- matrix("0", nrow=13, ncol=6)
+df[1:6,] <- paste(diag(6))
+df[8:12,] <- paste(diag(6)[1:5,])
+colnames(df) <- paste("$$d_{",1:6,",t}$$",sep="")
+df <- as_tibble(df)
+df$day <- rep(c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"),2)[1:13]
+
+dfrows <- 9
+df <- df[seq(dfrows),]
+df[dfrows,] <- "..."
+gt::gt(df, rowname_col = "day")
+```
+]
 
 ---
 
-## Models with multiple seasonal forecasting capabilities
+## Modelling seasonal patterns with...
+
+## Lagged terms
+
+.pull-left[
+*'Today will be similar to yesterday.'*
+
+✅ Very difficult to beat accuracy of.
+
+❌ Limited forecast horizon.
+
+❌ Cannot handle non-integer seasonality.
+]
+
+.pull-right[
+```{r lag-plot, fig.height = 10}
+pedestrian %>% 
+  filter(Sensor == "Southern Cross Station",
+         between(Date, parse_date("2015-04-13"), parse_date("2015-04-17"))) %>% 
+  autoplot(Count) + 
+  geom_line(aes(y = lag(Count, 24)), alpha = 0.5, colour = "red") + 
+  scale_x_datetime(date_labels = "%A", date_breaks = "1 day") +
+  labs(y = "Number of pedestrians", x = "Time", title = "Pedestrian traffic at Southern Cross Station (Victoria, Australia)")
+```
+]
+
+---
+
+## Modelling seasonal patterns with...
+
+## Fourier terms
+
+$$x_{1,t} = \sin\left(\textstyle\frac{2\pi t}{m}\right), x_{2,t} = \cos\left(\textstyle\frac{2\pi t}{m}\right),$$
+
+$$x_{3,t} = \sin\left(\textstyle\frac{4\pi t}{m}\right), x_{4,t} = \cos\left(\textstyle\frac{4\pi t}{m}\right), \ldots$$
+```{r fourier-plot, fig.height=3}
+ped_fourier <- tsibble::pedestrian %>% 
+  slice(24:(24*8) - 12)
+bind_cols(
+  ped_fourier,
+  fable:::fourier.tbl_ts(ped_fourier, 24*7, 2)
+) %>% 
+  pivot_longer(ends_with("168"), names_to = "term", values_to = "fourier") %>% 
+  ggplot(aes(x = Date_Time, y = fourier, colour = term)) + 
+  geom_line() + 
+  labs(x = NULL, y = NULL, colour = NULL)
+```
+
+---
+
+## Modelling seasonal patterns with...
+
+## Fourier terms
+
+.pull-left[
+Captures seasonal distribution with a continuous periodic functions.
+
+✅ Handles non-integer seasonality (days in year, weeks in month).
+
+✅ Flexibility of seasonal pattern controllable by number of harmonics.
+
+❌ More complicated to interpret.
+]
+
+.pull-right[
+```{r fourier-plot-2, ref.label="fourier-plot", fig.height = 10}
+```
+]
+
+---
+
+## Modelling seasonal patterns with...
+
+## Exogenous regressors
+
+.pull-left[
+Capture seasonality by providing underlying factors like temperature, and events.
+
+✅ Better handling of non-seasonal anomalies.
+
+❌ Data may be hard to find.
+
+❌ Future values must be forecasted.
+]
+
+.pull-right[
+```{r exog-plot, fig.height=10}
+pedestrian %>% 
+  filter(Sensor == "Southern Cross Station",
+         yearmonth(Date) == yearmonth("2015 Apr")) %>% 
+  group_by(Date) %>% 
+  mutate(workday = max(Count) > 2000) %>% 
+  ungroup() %>% 
+  autoplot(Count) + 
+  geom_rect(aes(xmin = lag(Date_Time), xmax = Date_Time, ymin = -Inf, ymax = Inf, fill = workday), alpha = 0.3) + 
+  geom_line() + 
+  scale_x_datetime(date_labels = "%d %b %Y", date_breaks = "5 days") +
+  labs(y = "Number of pedestrians", x = "Time", title = "Pedestrian traffic at Southern Cross Station (Victoria, Australia)")
+```
+]
+---
+class: inverse
+background-image: linear-gradient(to right, rgba(50, 50, 50, .5), rgba(50, 50, 50, .4)), url("resources/tree.jpg")
+background-size: cover
+
+.center[
+## Which seasonal methods should I use?
+]
+
+<hr>
+
+--
+
+.center[
+Whichever method is available and works best for your data!
+
+For *multiple* seasonality, *multiple* methods may be needed.
+]
+
+---
+
+## Models for forecasting multiple seasonalities
+
 
 <br>
 <table class="table">
