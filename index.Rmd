@@ -566,52 +566,6 @@ Capability for including seasonal terms.
 .footnote[(This table is a *massive* generalisation, everything depends on data and model complexity.)]
 
 ---
-
-## Models for forecasting multiple seasonalities
-
-
-<br>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Model</th>
-      <th>Flexible</th>
-      <th>Speed</th>
-      <th>Accuracy</th>
-      <th>Decompose Components</th>
-      <th>Evolving Terms</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Regression<br>(MLR, <b>GAM</b>, Prophet)</td>
-      <td class="success">Yes</td>
-      <td class="success">Fast</td>
-      <td class="warning">Okay</td>
-      <td class="warning">Depends</td>
-      <td class="danger">No</td>
-    </tr>
-    <tr>
-      <td>State&nbspSpace<br>(DSHW, TBATS, <b>FASSTER</b>)</td>
-      <td class="danger">No</td>
-      <td class="danger">Slow</td>
-      <td class="warning">Okay</td>
-      <td class="success">Yes</td>
-      <td class="success">Yes</td>
-    </tr>
-    <tr>
-      <td>Decomposition<br>(<b>STL + ???</b>)</td>
-      <td class="warning">Depends</td>
-      <td class="warning">Moderate</td>
-      <td class="warning">Okay</td>
-      <td class="success">Yes</td>
-      <td class="warning">Depends</td>
-    </tr>
-  </tbody>
-</table>
-
-.footnote[(This table is a *massive* generalisation, everything depends on data and model complexity.)]
----
 class: center
 
 ## Forecasting multiple seasonality in R
@@ -1137,7 +1091,7 @@ background-size: cover
 Plotting hourly data observed over six years can be tricky!
 
 ```{r admissions-plot, echo = TRUE, dev = "png", dpi = 150}
-admissions %>% 
+hospital %>% 
   autoplot(arrivals)
 ```
 
@@ -1147,9 +1101,9 @@ admissions %>%
 
 One possibility is to view a portion of the data (but you might miss things!)
 
-```{r admissions-dygraph, echo = TRUE}
+```{r hospital-dygraph, echo = TRUE}
 library(dygraphs)
-tsbox::ts_xts(admissions) %>% 
+tsbox::ts_xts(hospital) %>% 
   dygraph() %>% 
   dyRangeSelector(dateWindow = c("2010-01-01", "2010-02-01"))
 ```
@@ -1164,7 +1118,7 @@ Seeing the big picture may require aggregating the data.
 
 ```{r subseries-month, echo = TRUE, fig.height=2.5}
 library(feasts)
-admissions %>% 
+hospital %>% 
   index_by(date = yearmonth(time)) %>% 
   summarise(arrivals = sum(arrivals)) %>% 
   gg_subseries(arrivals, period = "year")
@@ -1178,7 +1132,7 @@ admissions %>%
 # Visualising multiple seasonality
 
 ```{r subseries-week, echo = TRUE, dev = "png", dpi = 150}
-admissions %>% 
+hospital %>% 
   index_by(date = as.Date(time)) %>% 
   summarise(arrivals = sum(arrivals)) %>% 
   gg_subseries(arrivals, period = "week")
@@ -1191,7 +1145,7 @@ admissions %>%
 # Visualising multiple seasonality
 
 ```{r subseries-day, echo = TRUE, dev = "png", dpi = 150}
-admissions %>% 
+hospital %>% 
   gg_subseries(arrivals, period = "day")
 ```
 
@@ -1202,7 +1156,7 @@ admissions %>%
 # Visualising multiple seasonality
 
 ```{r ggplot-day, echo = TRUE, dev = "png", dpi = 150}
-admissions %>% 
+hospital %>% 
   ggplot(aes(x = hour(time), y = arrivals)) + 
   geom_jitter(alpha = 0.01) +
   geom_smooth() + 
@@ -1217,7 +1171,7 @@ admissions %>%
 
 ```{r cal-code, eval = FALSE, echo = TRUE}
 library(sugrrants) #<<
-p <- admissions %>% 
+p <- hospital %>% 
   mutate(date = as.Date(time)) %>% 
   filter(year(time) == 2012) %>% 
   frame_calendar(x = hour(time), y = arrivals, date = date) %>% #<<
@@ -1232,6 +1186,402 @@ prettify(p)
 # Visualising multiple seasonality
 
 ```{r cal-plot, ref.label="cal-code"}
+```
+
+---
+class: inverse, center
+background-image: linear-gradient(to right, rgba(50, 50, 50, .7), rgba(50, 50, 50, .7)), url("resources/books.jpg")
+background-size: cover
+
+.title[Making forecasts]
+
+<hr>
+
+<br>
+
+## Data modelling
+
+.left[
+.footnote[
+⚠️ The specific models/forecasts shown are in no way recommended or good.
+
+They simply demonstrate how multiple seasonalities can be modelled.]
+]
+
+---
+
+## Models for forecasting multiple seasonalities
+
+
+<br>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Flexible</th>
+      <th>Speed</th>
+      <th>Accuracy</th>
+      <th>Decompose Components</th>
+      <th>Evolving Terms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Regression<br>(MLR, GAM, <b>Prophet</b>)</td>
+      <td class="success">Yes</td>
+      <td class="success">Fast</td>
+      <td class="warning">Okay</td>
+      <td class="warning">Depends</td>
+      <td class="danger">No</td>
+    </tr>
+    <tr>
+      <td>State&nbspSpace<br>(DSHW, TBATS, <b>FASSTER</b>)</td>
+      <td class="danger">No</td>
+      <td class="danger">Slow</td>
+      <td class="warning">Okay</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+    </tr>
+    <tr>
+      <td>Decomposition<br>(<b>STL + ???</b>)</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Moderate</td>
+      <td class="warning">Okay</td>
+      <td class="success">Yes</td>
+      <td class="warning">Depends</td>
+    </tr>
+  </tbody>
+</table>
+
+.footnote[(This table is a *massive* generalisation, everything depends on data and model complexity.)]
+
+---
+
+## Regression modelling
+
+<br>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Flexible</th>
+      <th>Speed</th>
+      <th>Accuracy</th>
+      <th>Decompose Components</th>
+      <th>Evolving Terms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Regression<br>(MLR, GAM, <b>Prophet</b>)</td>
+      <td class="success">Yes</td>
+      <td class="success">Fast</td>
+      <td class="warning">Okay</td>
+      <td class="warning">Depends</td>
+      <td class="danger">No</td>
+    </tr>
+  </tbody>
+</table>
+
+Uses time series features / regressors with known future values to produce forecasts.
+
+✅ Generally fast, as model estimation is time independent.
+
+❌ Model behaviour does not update over time for changing dynamics.
+
+Highly recommended read on GAM forecasting: https://petolau.github.io/Analyzing-double-seasonal-time-series-with-GAM-in-R/
+---
+
+## Prophet
+
+Facebook's forecasting model based on a GAM which uses regressors for growth, seasonality, and holidays.
+
+$$
+  y(t) = g(t) + s_1(t) + s_2(t) + h(t) + \varepsilon_t
+$$
+
+where $g(t)$ is the growth function, $s(t)$ are fourier terms, and $h(t)$ are holiday regressors.
+
+Available directly in the [`{prophet}`](https://facebook.github.io/prophet/) package, or a fable interface from [`{fable.prophet}`](http://pkg.mitchelloharawild.com/fable.prophet/).
+
+---
+
+## Specifying a prophet model
+
+Using default settings
+
+```{r}
+library(fable.prophet)
+hospital %>% 
+  model(prophet(arrivals)) %>% 
+  forecast(h = "2 weeks") %>% 
+  autoplot(tail(hospital, 24*7*4))
+```
+
+---
+
+## Specifying a prophet model
+
+Customising the `season()` options.
+
+```{r}
+library(fable.prophet)
+hospital %>% 
+  model(prophet(arrivals ~ season("day", 7, type = "mult") + season("week", 4))) %>% 
+  forecast(h = "2 weeks") %>% 
+  autoplot(tail(hospital, 24*7*4))
+```
+
+---
+
+## State space modelling
+
+<br>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Flexible</th>
+      <th>Speed</th>
+      <th>Accuracy</th>
+      <th>Decompose Components</th>
+      <th>Evolving Terms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>State&nbspSpace<br>(DSHW, TBATS, <b>FASSTER</b>)</td>
+      <td class="danger">No</td>
+      <td class="danger">Slow</td>
+      <td class="warning">Okay</td>
+      <td class="success">Yes</td>
+      <td class="success">Yes</td>
+    </tr>
+  </tbody>
+</table>
+
+Iterates 'state equations' over time to produce forecasts.
+
+✅ Model behaviour updates for changes in the data.
+
+❌ Relatively slow, as model estimation is done sequentially over time.
+
+---
+
+## FASSTER
+
+A model which provides flexible regression-style model specification with evolving terms of state space models via a DLM.
+
+\begin{align*}
+y_t &= F_t\theta_t + v_t, & v_t &\sim \mathcal{N}(0,V)\\
+\theta_t &= G\theta_{t-1} + w_t, & w_t&\sim \mathcal{N}(0,W)
+\end{align*}
+
+The underlying states are given by $\theta$, which can be thought of as components linearly combined by $F_t$ to produce the response $y_t$. The $G$ matrix defines the behaviour of each state (seasonality, trend, regression, ...).
+
+Available with direct fable compatibility in the [`{fasster}`](http://fasster.tidyverts.org/) package.
+
+---
+
+## Specifying seasonality with FASSTER
+
+FASSTER allows all aforementioned seasonal terms to be specified.
+
+```{r fasster-seasonality}
+tibble::tribble(
+  ~ `Seasonal term`, ~ Special,
+  "Seasonal dummies", "y ~ season(p)",
+  "Lag terms", "y ~ lag(y, p)",
+  "Fourier terms", "y ~ fourier(p, K)",
+  "Regressors", "y ~ x"
+) %>% 
+  gt::gt()
+```
+
+---
+
+## Specifying several seasonalities with FASSTER
+
+```{r fasster-simple}
+library(fasster)
+ped_train <- pedestrian %>% 
+  filter(Sensor == "Southern Cross Station",
+         yearmonth(Date) == yearmonth("2015 Apr"))
+ped_train %>% 
+  model(fasster(Count ~ trend(1) + fourier("week", 3) + (wday(Date_Time) %in% c(1,7)) %S% fourier("day", 10))) %>% 
+  forecast(h = "2 weeks") %>% 
+  autoplot(ped_train)
+```
+
+---
+
+## Decomposition modelling
+
+<br>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Flexible</th>
+      <th>Speed</th>
+      <th>Accuracy</th>
+      <th>Decompose Components</th>
+      <th>Evolving Terms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Decomposition<br>(<b>STL + ???</b>)</td>
+      <td class="warning">Depends</td>
+      <td class="warning">Moderate</td>
+      <td class="warning">Okay</td>
+      <td class="success">Yes</td>
+      <td class="warning">Depends</td>
+    </tr>
+  </tbody>
+</table>
+
+Decomposes time series into components, allowing seasonality to be forecasted
+separately with simpler methods.
+
+✅ Allows complex time series to be forecasted with simpler models.
+
+❌ Highly dependent on the ability to decompose the time series.
+
+---
+
+## STL + ???
+
+Uses repeated STL decompositions to decompose multiple seasonalities into separate time series. Then other models (`???`) can be used to forecast the simpler components.
+
+$$y_{t} = S_{\text{year},t} + S_{\text{week},t} + S_{\text{day},t} + T_{t} + R_t$$
+
+Available with direct fable compatibility in the [`{feasts}`](http://feasts.tidyverts.org/) package.
+
+---
+
+## Decomposing a time series
+
+Using an `STL` decomposition with default settings:
+
+```{r dcmp-stl, echo = TRUE, dev = "png", dpi = 150}
+library(feasts)
+hospital_dcmp <- hospital %>% 
+  model(STL(arrivals)) 
+components(hospital_dcmp) %>% autoplot()
+```
+
+---
+
+## Decomposing a time series
+
+Using an `STL` decomposition with default settings:
+
+```{r dcmp-stl-plot, echo = TRUE}
+components(hospital_dcmp) %>% 
+  tail(24*7*5) %>% 
+  autoplot()
+```
+
+---
+
+## Decomposing a time series
+
+Refining the loess windows for the sub-daily data frequency:
+
+```{r dcmp-custom, echo = TRUE, dev = "png", dpi = 150}
+hospital_dcmp <- hospital %>% 
+  model(STL(arrivals ~ trend(window = 24*7*5) + season("year", window = Inf) +
+              season("week", window = 24*7*5) + season("day", window = 24*7)))
+components(hospital_dcmp) %>% autoplot()
+```
+
+---
+
+## Decomposing a time series
+
+Refining the loess windows for the sub-daily data frequency:
+
+```{r dcmp-custom-plot, echo = TRUE}
+components(hospital_dcmp) %>% 
+  tail(24*7*5) %>% 
+  autoplot()
+```
+
+---
+
+## Modelling decomposed components
+
+As seasonality changes slowly, it is easily modelled with naive lags.
+
+```{r season-week-fc, echo = TRUE}
+components(hospital_dcmp)[-1] %>% 
+  model(SNAIVE(season_week ~ lag("week"))) %>% 
+  forecast(h = "2 weeks") %>% 
+  autoplot(tail(components(hospital_dcmp)[-1], 24*7*4))
+```
+
+---
+
+## Modelling decomposed components
+
+As seasonality changes slowly, it is easily modelled with naive lags.
+
+```{r season-day-fc, echo = TRUE}
+components(hospital_dcmp)[-1] %>% 
+  model(SNAIVE(season_day ~ lag("day"))) %>% 
+  forecast(h = "2 weeks") %>% 
+  autoplot(tail(components(hospital_dcmp)[-1], 24*7*4))
+```
+
+---
+
+## Modelling decomposed components
+
+The seasonally adjusted data (trend + remainder) is typically forecasted together.
+
+```{r seasadjust-arima, echo = TRUE}
+components(hospital_dcmp)[-1] %>% 
+  model(ARIMA(season_adjust ~ 0 + pdq(3,0,3) + PDQ(1,0,0))) %>% 
+  forecast(h = "3 days") %>% 
+  autoplot(tail(components(hospital_dcmp)[-1], 24*4))
+```
+
+---
+
+## Combining individual forecasts
+
+Use `decomposition_model()` to specify all component models:
+
+```{r dcmp-model, echo = TRUE}
+dcmp_spec <- decomposition_model(
+  dcmp = STL(arrivals ~ trend(window = 24*7*5) + season("year", window = Inf) +
+              season("week", window = 24*7*5) + season("day", window = 24*7)),
+  ARIMA(season_adjust ~ 0 + pdq(3,0,3) + PDQ(1,0,0)),
+  SNAIVE(season_week ~ lag("week")),
+  SNAIVE(season_day ~ lag("day"))
+)
+```
+
+--
+
+Notice that I haven't provided a model for `season_year`. A `SNAIVE()` model will
+be used by default for seasonal components.
+
+---
+
+## Combining individual forecasts
+
+Then use it as a regular model, the recombination is done automatically.
+
+```{r dcmp-model-fc, echo = TRUE}
+hospital %>% 
+  model(dcmp_spec) %>% 
+  forecast(h = "2 weeks") %>% 
+  autoplot(tail(hospital, 24*7*4))
 ```
 
 
