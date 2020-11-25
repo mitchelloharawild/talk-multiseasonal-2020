@@ -1311,7 +1311,7 @@ Available directly in the [`{prophet}`](https://facebook.github.io/prophet/) pac
 
 Using default settings
 
-```{r}
+```{r prophet, echo = TRUE}
 library(fable.prophet)
 hospital %>% 
   model(prophet(arrivals)) %>% 
@@ -1325,7 +1325,7 @@ hospital %>%
 
 Customising the `season()` options.
 
-```{r}
+```{r prophet-custom, echo = TRUE}
 library(fable.prophet)
 hospital %>% 
   model(prophet(arrivals ~ season("day", 7, type = "mult") + season("week", 4))) %>% 
@@ -1404,11 +1404,11 @@ tibble::tribble(
 
 ## Specifying several seasonalities with FASSTER
 
-```{r fasster-simple}
+```{r fasster-simple, echo = TRUE}
 library(fasster)
 ped_train <- pedestrian %>% 
   filter(Sensor == "Southern Cross Station",
-         yearmonth(Date) == yearmonth("2015 Apr"))
+         yearmonth(Date) == yearmonth("2015 July"))
 ped_train %>% 
   model(fasster(Count ~ trend(1) + fourier("week", 3) + (wday(Date_Time) %in% c(1,7)) %S% fourier("day", 10))) %>% 
   forecast(h = "2 weeks") %>% 
